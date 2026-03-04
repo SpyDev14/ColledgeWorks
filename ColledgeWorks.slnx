@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="AwfulDocumentViewer/AwfulDocumentViewer.csproj" />
+  <Project Path="BoringTestOfSuperPuperDuperUsefulLibrary/BoringTestOfSuperPuperDuperUsefulLibrary.csproj" Id="939860d9-d836-4710-9900-56ad4177119e" />
+  <Project Path="SuperPuperDuperUsefulLibrary/SuperPuperDuperLibrary.csproj" Id="f68b2ce1-c1cd-4056-9198-8b5685c0884d">
+    <BuildType Project="Release" />
+  </Project>
+</Solution>
