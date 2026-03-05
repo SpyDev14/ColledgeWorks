@@ -1,4 +1,4 @@
-namespace AlarmClock
+namespace MathQuiz
 {
 	internal static class Program
 	{

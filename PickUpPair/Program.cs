@@ -1,4 +1,4 @@
-namespace AlarmClock
+namespace PickUpPair
 {
 	internal static class Program
 	{

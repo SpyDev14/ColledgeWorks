@@ -1,7 +1,9 @@
-namespace AlarmClock
+namespace PracticalN5
 {
 	internal static class Program
 	{
+		public const string TEXT_FILE_FILTER = "Text files (*.txt)|*.txt";
+
 		/// <summary>
 		///  The main entry point for the application.
 		/// </summary>

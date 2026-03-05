@@ -2,7 +2,11 @@
   <Project Path="AlarmClock/AlarmClock.csproj" Id="fc46b097-73a3-4b71-8e84-797bcf9e6af3" />
   <Project Path="AwfulDocumentViewer/AwfulDocumentViewer.csproj" />
   <Project Path="BoringTestOfSuperPuperLibrary/BoringTestOfSuperPuperLibrary.csproj" Id="939860d9-d836-4710-9900-56ad4177119e" />
+  <Project Path="Functions_PW9/Functions_PW9.csproj" Id="1596e2d3-4c96-4bc3-b91c-667e999ebea6" />
   <Project Path="FunctionViewer/FunctionViewer.csproj" Id="165a8be4-db5c-4ef0-8076-c72bf852e4a1" />
+  <Project Path="MathQuiz/MathQuiz.csproj" Id="8e3aefe0-e3a6-44ef-adf6-e5d5eafad779" />
+  <Project Path="PickUpPair/PickUpPair.csproj" Id="1a39a48d-3639-4820-92e4-a8c3b5595b4b" />
+  <Project Path="PracticalN5/PracticalN5.csproj" Id="89fb9f7d-03fa-4810-b0d7-10f20f33e22c" />
   <Project Path="SuperPuperLibrary/SuperPuperLibrary.csproj" Id="f68b2ce1-c1cd-4056-9198-8b5685c0884d">
     <BuildType Project="Release" />
   </Project>

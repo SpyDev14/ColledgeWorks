@@ -42,7 +42,7 @@
 			label1.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, 204);
 			label1.Location = new Point(10, 10);
 			label1.Name = "label1";
-			label1.Size = new Size(119, 28);
+			label1.Size = new Size(115, 28);
 			label1.TabIndex = 1;
 			label1.Text = "Выберите версию";
 			label1.TextAlign = ContentAlignment.TopCenter;
@@ -52,7 +52,7 @@
 			btnVer1.Dock = DockStyle.Top;
 			btnVer1.Location = new Point(10, 38);
 			btnVer1.Name = "btnVer1";
-			btnVer1.Size = new Size(119, 30);
+			btnVer1.Size = new Size(115, 30);
 			btnVer1.TabIndex = 0;
 			btnVer1.Text = "Version 1";
 			btnVer1.UseVisualStyleBackColor = true;
@@ -63,7 +63,7 @@
 			btnVer2.Dock = DockStyle.Top;
 			btnVer2.Location = new Point(10, 68);
 			btnVer2.Name = "btnVer2";
-			btnVer2.Size = new Size(119, 30);
+			btnVer2.Size = new Size(115, 30);
 			btnVer2.TabIndex = 2;
 			btnVer2.Text = "Version 2";
 			btnVer2.UseVisualStyleBackColor = true;
@@ -75,7 +75,7 @@
 			btnVer3.Enabled = false;
 			btnVer3.Location = new Point(10, 98);
 			btnVer3.Name = "btnVer3";
-			btnVer3.Size = new Size(119, 30);
+			btnVer3.Size = new Size(115, 30);
 			btnVer3.TabIndex = 3;
 			btnVer3.Text = "Version 3";
 			btnVer3.UseVisualStyleBackColor = true;
@@ -86,7 +86,7 @@
 			btnVer4.Enabled = false;
 			btnVer4.Location = new Point(10, 128);
 			btnVer4.Name = "btnVer4";
-			btnVer4.Size = new Size(119, 30);
+			btnVer4.Size = new Size(115, 30);
 			btnVer4.TabIndex = 4;
 			btnVer4.Text = "Version 4";
 			btnVer4.UseVisualStyleBackColor = true;
@@ -101,6 +101,7 @@
 			Controls.Add(btnVer2);
 			Controls.Add(btnVer1);
 			Controls.Add(label1);
+			FormBorderStyle = FormBorderStyle.FixedSingle;
 			MaximizeBox = false;
 			MinimizeBox = false;
 			Name = "EntranceForm";

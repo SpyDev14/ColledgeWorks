@@ -58,7 +58,6 @@
 			// 
 			pictureBox1.BorderStyle = BorderStyle.FixedSingle;
 			pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-			pictureBox1.InitialImage = (Image)resources.GetObject("pictureBox1.InitialImage");
 			pictureBox1.Location = new Point(12, 12);
 			pictureBox1.Name = "pictureBox1";
 			pictureBox1.Size = new Size(193, 65);
@@ -171,7 +170,7 @@
 			// 
 			btnRecalculate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
 			btnRecalculate.Location = new Point(12, 291);
-			btnRecalculate.Name = "btnReCalc";
+			btnRecalculate.Name = "btnRecalculate";
 			btnRecalculate.Size = new Size(193, 30);
 			btnRecalculate.TabIndex = 10;
 			btnRecalculate.Text = "Расчитать";
@@ -179,6 +178,7 @@
 			// 
 			// maxFuncValueTextBox
 			// 
+			maxFuncValueTextBox.Enabled = false;
 			maxFuncValueTextBox.Location = new Point(12, 245);
 			maxFuncValueTextBox.Name = "maxFuncValueTextBox";
 			maxFuncValueTextBox.ReadOnly = true;
@@ -187,6 +187,7 @@
 			// 
 			// minFuncValueTextBox
 			// 
+			minFuncValueTextBox.Enabled = false;
 			minFuncValueTextBox.Location = new Point(12, 194);
 			minFuncValueTextBox.Name = "minFuncValueTextBox";
 			minFuncValueTextBox.ReadOnly = true;
@@ -211,6 +212,7 @@
 			Controls.Add(label1);
 			Controls.Add(dataGridView1);
 			Controls.Add(pictureBox1);
+			MinimumSize = new Size(358, 357);
 			Name = "MainFormVer2";
 			Text = "MainFormVer2";
 			((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();

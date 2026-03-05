@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Threading.Channels;
 
 namespace FunctionViewer;
 
@@ -6,7 +7,11 @@ public partial class MainFormVer2 : Form
 {
 	readonly Color defaultInputBgColor;
 	readonly Color invalidDataInputBgColor = Color.FromArgb(240, 219, 220);
-	private CancellationTokenSource? _cts;
+	CancellationTokenSource? _cts;
+	Channel<(double x, double y)[]>? _channel;
+
+	const string BTN_CALCULATE_TEXT = "Расчитать";
+	const string BTN_STOP_TEXT = "Остановить";
 
 	public MainFormVer2()
 	{
@@ -95,8 +100,11 @@ public partial class MainFormVer2 : Form
 		maxFuncValueTextBox.Text = max.ToString();
 		minFuncValueTextBox.Text = min.ToString();
 	}
-
-	async Task UpdateCalculationsAsync(CancellationToken token)
+	
+	// Тоже на память
+	// Код дублируется, но на это пофиг т.к это на память
+	[Obsolete]
+	async Task UpdateCalculationsAsyncGen1(CancellationToken token)
 	{
 		minFuncValueTextBox.Text = "";
 		maxFuncValueTextBox.Text = "";
@@ -129,71 +137,178 @@ public partial class MainFormVer2 : Form
 		var progress = new Progress<((double x, double y)[] pack, ushort size)>(pointsPackBlock =>
 		{
 			var (pack, size) = pointsPackBlock;
+			dataGridView1.SuspendLayout();
 			for (byte i = 0; i < size; i++)
 				dataGridView1.Rows.Add(pack[i].x, pack[i].y);
+			dataGridView1.ResumeLayout();
 		});
 
 		var (min, max) = await Task.Run(() => ComputePoints(from, to, step, progress, token));
 
 		maxFuncValueTextBox.Text = max.ToString();
 		minFuncValueTextBox.Text = min.ToString();
+
+		(double min, double max) ComputePoints(
+			double from, double to, double step,
+			IProgress<((double x, double y)[] pack, ushort size)> progress,
+			CancellationToken token
+		)
+		{
+			// Всё равно виснет как собака -_-
+			const ushort REPORT_BUFFER_SIZE = 100;
+			var reportBuffer = new (double x, double y)[REPORT_BUFFER_SIZE];
+			ushort reportBufferCounter = 0;
+
+			double min = double.MaxValue;
+			double max = double.MinValue;
+
+			double x = from;
+			while (x <= to)
+			{
+				token.ThrowIfCancellationRequested();
+
+				double y = Program.Function(x);
+				if (!double.IsNaN(y))
+				{
+					if (max < y) max = y;
+					if (min > y) min = y;
+				}
+
+				reportBuffer[reportBufferCounter] = (x, y);
+				reportBufferCounter++;
+
+				if (reportBufferCounter == REPORT_BUFFER_SIZE)
+				{
+					progress.Report((reportBuffer, REPORT_BUFFER_SIZE));
+					reportBufferCounter = 0;
+				}
+
+				x += step;
+			}
+
+			if (reportBufferCounter > 0)
+				progress.Report((reportBuffer, reportBufferCounter));
+
+			if (min == double.MaxValue) min = double.NaN;
+			if (max == double.MinValue) max = double.NaN;
+
+			return (min, max);
+		}
 	}
 
-	(double min, double max) ComputePoints(
-		double from, double to, double step,
-		IProgress<((double x, double y)[] pack, ushort size)> progress,
-		CancellationToken token
-	)
+	async Task UpdateCalculationsAsync(CancellationToken token)
 	{
-		// Всё равно виснет как собака -_-
-		const ushort REPORT_BUFFER_SIZE = 100;
-		var reportBuffer = new (double x, double y)[REPORT_BUFFER_SIZE];
-		ushort reportBufferCounter = 0;
+		const int CHANNEL_BUFFER_SIZE = 1;
 
-		double min = double.MaxValue;
-		double max = double.MinValue;
+		minFuncValueTextBox.Text = "";
+		maxFuncValueTextBox.Text = "";
+		dataGridView1.Rows.Clear();
 
-		double x = from;
-		while (x <= to)
+		if (
+			!TryParseValueFrom(inputFrom, out var from) ||
+			!TryParseValueFrom(inputTo, out var to) ||
+			!TryParseValueFrom(inputStep, out var step)
+		) return;
+
+		bool someInvalid = false;
+		if (to < from)
 		{
-			token.ThrowIfCancellationRequested();
-
-			double y = Program.Function(x);
-			if (!double.IsNaN(y))
-			{
-				if (max < y) max = y;
-				if (min > y) min = y;
-			}
-
-			reportBuffer[reportBufferCounter] = (x, y);
-			reportBufferCounter++;
-
-			if (reportBufferCounter == REPORT_BUFFER_SIZE)
-			{
-				progress.Report((reportBuffer, REPORT_BUFFER_SIZE));
-				reportBufferCounter = 0;
-			}
-
-			x += step;
+			DisplayValid(inputTo, false);
+			someInvalid = true;
 		}
 
-		if (reportBufferCounter > 0)
-			progress.Report((reportBuffer, reportBufferCounter));
+		if (step <= 0)
+		{
+			DisplayValid(inputStep, false);
+			someInvalid = true;
+		}
 
-		if (min == double.MaxValue) min = double.NaN;
-		if (max == double.MinValue) max = double.NaN;
+		if (someInvalid)
+			return;
 
-		return (min, max);
+
+		_channel = Channel.CreateBounded<(double x, double y)[]>(
+			new BoundedChannelOptions(CHANNEL_BUFFER_SIZE)
+			{
+				FullMode = BoundedChannelFullMode.Wait
+			}
+		);
+
+		// Читает и отображает
+		var consumerTask = Task.Run(async () =>
+		{
+			await foreach (var points in _channel.Reader.ReadAllAsync(token))
+			{
+				Invoke(() =>
+				{
+					dataGridView1.SuspendLayout();
+					foreach (var p in points)
+						dataGridView1.Rows.Add(p.x, p.y);
+					dataGridView1.ResumeLayout();
+				});
+			}
+		});
+
+		double min = double.MinValue;
+		double max = double.MaxValue;
+		// Рассчитывает и записывает
+		var producerTask = Task.Run(async () =>
+		{
+			const int CHUNK_SIZE = 200;
+			// Лень с массивом работать, тут небольшой оверхед
+			var buffer = new List<(double x, double y)>(CHUNK_SIZE);
+
+			double x = from;
+			while (x <= to)
+			{
+				token.ThrowIfCancellationRequested();
+				double y = Program.Function(x);
+				if (!double.IsNaN(y))
+				{
+					if (y > max) max = y;
+					if (y < min) min = y;
+				}
+				buffer.Add((x, y));
+				if (buffer.Count == CHUNK_SIZE)
+				{
+					await _channel.Writer.WriteAsync(buffer.ToArray(), token);
+					buffer.Clear();
+				}
+
+				x += step;
+			}
+
+			if (buffer.Count > 0)
+				await _channel.Writer.WriteAsync(buffer.ToArray(), token);
+			_channel.Writer.Complete();
+		}, token);
+
+		await consumerTask;
+
+		minFuncValueTextBox.Text = min.ToString();
+		maxFuncValueTextBox.Text = max.ToString();
 	}
 
 	async void btnRecalculate_Click(object? sender, EventArgs e)
 	{
-		_cts?.Cancel();
+		// Уже выполняется
+		if (_cts != null)
+		{
+			_cts?.Cancel();
+			return;
+		}
+
+		btnRecalculate.Text = BTN_STOP_TEXT;
+		btnRecalculate.Refresh();
+
 		using var cts = new CancellationTokenSource();
 		_cts = cts;
 
 		try { await UpdateCalculationsAsync(cts.Token); }
 		catch (OperationCanceledException) { }
-		finally { if (_cts == cts) _cts = null; }
+		finally {
+			if (_cts == cts) _cts = null;
+			btnRecalculate.Text = BTN_CALCULATE_TEXT;
+		}
 	}
 }
