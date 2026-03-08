@@ -100,7 +100,7 @@ internal static class GlobalStaticMethods
 		string prefix = ">>> "
 	)
 	{
-		// На память (никто не будет смотреть git log) //
+		// На память (никто не будет смотреть git log)
 
 		//var oldOut = Console.Out;
 		//if (nestedLevel != 0 && oldOut is not IndentedTextWriter)
