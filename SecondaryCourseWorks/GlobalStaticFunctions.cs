@@ -89,7 +89,7 @@ internal static class GlobalStaticFunctions
 				continue;
 			}
 			if (answer == Comma.BREAK)
-				if (allowBreak) throw new BreakWorkProcessing();
+				if (allowBreak) throw new BreakWorkExecuting();
 				else {
 					Console.WriteLine($"{Comma.BREAK} не доступен в текущем контексте.\n");
 					continue;
@@ -140,7 +140,10 @@ internal static class GlobalStaticFunctions
 			}
 
 			if (!validation.HasValue || validation.Value.validate(value))
+			{
+				Console.WriteLine();
 				return value;
+			}
 
 			Console.WriteLine(validation.Value.msgIsInvalid);
 			Console.WriteLine();

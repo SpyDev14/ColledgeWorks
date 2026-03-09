@@ -50,21 +50,18 @@ internal class Program
 				}
 
 				try { work.Execute(); }
-#if DEBUG
-				catch (BreakWorkProcessing) { }
+				catch (BreakWorkExecuting) { }
 				// Обычно использование исключений в качестве
 				// goto является плохой практикой, но это
 				// тот редкий случай, когда он действительно оправдан.
+#if DEBUG
 #else
 				catch (Exception ex)
 				{
-					if (ex is not BreakWorkProcessing)
-					{
-						Console.WriteLine(
-							$"Выполнение завершилось с ошибкой: {ex.Message}\n" +
-							$"Код ошибки: {ex.HResult}"
-						);
-					}
+					Console.WriteLine(
+						$"Выполнение завершилось с ошибкой: {ex.Message}\n" +
+						$"Код ошибки: {ex.HResult}"
+					);
 				}
 #endif
 				Console.SetOut(oldOut);
