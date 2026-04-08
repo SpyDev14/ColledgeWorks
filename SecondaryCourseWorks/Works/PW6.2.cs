@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SecondaryCourseWorks.Works;
+﻿namespace SecondaryCourseWorks.Works;
 
 internal class PW62 : BasePracticalWork
 {
@@ -16,12 +12,12 @@ internal class PW62 : BasePracticalWork
 		Если такого столбца нет, то вывести сообщение об этом.
 	";
 
-	int width = Random.Shared.Next(5, 10);
-	int height = Random.Shared.Next(3, 6);
-
 	public override void Execute()
 	{
-		int[,] matrix = CreateRandom2DMatrix(height, width, -15, 15);
+		int cols = Random.Shared.Next(6, 10);
+		int rows = Random.Shared.Next(4, 6);
+
+		int[,] matrix = CreateRandom2DMatrix(cols, rows, -15, 15);
 
 		Console.WriteLine("Матрица:");
 		matrix.PrintMatrix();
@@ -37,84 +33,84 @@ internal class PW62 : BasePracticalWork
 
 	void Part1(ref int[,] matrix)
 	{
-		int rows = matrix.GetLength(0);
-		int cols = matrix.GetLength(1);
-		int max = int.MinValue;
+		var rows = matrix.GetLength(0);
+		var cols = matrix.GetLength(1);
 
-		for (int i = 0; i < rows; i++)
-			for (int j = 0; j < cols; j++)
+		int max = int.MinValue;
+		var rowsWithMax = new List<int>(capacity: rows);
+
+		for (int row = 0; row < rows; row++)
+			for (int col = 0; col < cols; col++)
 			{
-				int el = matrix[i, j];
-				if (max < el) max = el;
+				int el = matrix[row, col];
+				if (max < el)
+				{
+					max = el;
+					rowsWithMax.Clear();
+					// Добавляем при нахождении
+					rowsWithMax.Add(row);
+				}
+				// Добавляем при повторной встрече max, избегаем дублирования
+				else if (el == max && rowsWithMax.LastOrDefault() != row)
+					rowsWithMax.Add(row);
 			}
 
+		bool[] rowHasMax = new bool[rows];
+		foreach (var row in rowsWithMax)
+			rowHasMax[row] = true;
+
 		Console.WriteLine($"Максимальный элемент: {max}\n");
+		Console.WriteLine($"Строки с максимумом: {rowsWithMax.ToArray().Repr()}");
 
-		bool[] rowsWithMax = new bool[rows];
-
-		for (int i = 0; i < rows; i++)
-			for (int j = 0; j < cols; j++)
-				if (matrix[i, j] == max)
-				{
-					rowsWithMax[i] = true;
-					break;
-				}
-
-		int[] firstRow = new int[cols];
-		for (int j = 0; j < cols; j++) firstRow[j] = matrix[0, j];
-
-		var newRows = new List<int[]>();
-		for (int i = 0; i < rows; i++)
+		int[,] newMatrix = new int[rows + rowsWithMax.Count, cols];
+		int currentWriteRow = 0;
+		for (int row = 0; row < rows; row++)
 		{
-			int[] currentRow = new int[cols];
-			for (int j = 0; j < cols; j++) currentRow[j] = matrix[i, j];
-			newRows.Add(currentRow);
-			if (rowsWithMax[i])
-				newRows.Add(firstRow.ToArray());
+			for (int col = 0; col < cols; col++)
+				newMatrix[currentWriteRow, col] = matrix[row, col];
+			currentWriteRow++;
+
+			if (!rowHasMax[row]) continue;
+			for (int col = 0; col < cols; col++)
+				newMatrix[currentWriteRow, col] = matrix[0, col];
+			currentWriteRow++;
 		}
-
-		int newRowsCount = newRows.Count;
-		int[,] newMatrix = new int[newRowsCount, cols];
-		for (int i = 0; i < newRowsCount; i++)
-			for (int j = 0; j < cols; j++)
-				newMatrix[i, j] = newRows[i][j];
-
 		matrix = newMatrix;
 	}
 
 	void Part2(ref int[,] matrix)
 	{
+		var rows = matrix.GetLength(0);
+		var cols = matrix.GetLength(1);
+
 		int targetElement = Input<int>("Элемент для поиска");
 
-		int rows = matrix.GetLength(0);
-		int cols = matrix.GetLength(1);
-		bool[] removeCol = new bool[cols];
-		bool found = false;
+		bool[] hasColTarget = new bool[cols];
+		for (int row = 0; row < rows; row++)
+			for (int col = 0; col < cols; col++)
+				if (matrix[row, col] == targetElement)
+					hasColTarget[col] = true;
 
-		for (int j = 0; j < cols; j++)
-			for (int i = 0; i < rows; i++)
-				if (matrix[i, j] == targetElement)
-				{
-					removeCol[j] = true;
-					found = true;
-					break;
-				}
+		int colsWithTargetCount = 0;
+		foreach (var has in hasColTarget)
+			if (has) colsWithTargetCount++;
 
-		if (!found)
+		if (colsWithTargetCount == 0)
 		{
-			Console.WriteLine("Столбцов с заданным элементом не найдено.");
+			Console.WriteLine($"Нет столбцов с элементом {targetElement}.");
 			return;
 		}
 
-		var keptCols = new List<int>();
-		for (int j = 0; j < cols; j++)
-			if (!removeCol[j]) keptCols.Add(j);
-
-		int newCols = keptCols.Count;
-		int[,] newMatrix = new int[rows, newCols];
-		for (int i = 0; i < rows; i++)
-			for (int newJ = 0; newJ < newCols; newJ++)
-				newMatrix[i, newJ] = matrix[i, keptCols[newJ]];
+		int[,] newMatrix = new int[rows, cols - colsWithTargetCount];
+		int currentWriteCol = 0;
+		for (int col = 0; col < cols; col++)
+		{
+			if (hasColTarget[col])
+				continue;
+			for (int row = 0; row < rows; row++)
+				newMatrix[row, currentWriteCol] = matrix[row, col];
+			currentWriteCol++;
+		}
 
 		matrix = newMatrix;
 	}

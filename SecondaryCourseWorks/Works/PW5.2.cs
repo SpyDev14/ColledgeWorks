@@ -48,12 +48,20 @@ internal class PW52 : BasePracticalWork
 
 	void Part2(ref int[] arr)
 	{
-		List<int> newArr = [];
+		int[] newArr = new int[arr.Length - 1];
 		bool isNegativeSeen = false;
+		int i = 0;
 		foreach (int num in arr)
 		{
-			if (num < 0) { isNegativeSeen = true; continue; }
-			newArr.Add(num);
+			// Негативных чисел не было
+			if (i == newArr.Length) break;
+			if (num < 0 && !isNegativeSeen)
+			{
+				isNegativeSeen = true;
+				continue;
+			}
+			newArr[i] = num;
+			i++;
 		}
 		if (!isNegativeSeen)
 			Console.WriteLine("Массив состоял только из положительных чисел.");
@@ -64,7 +72,30 @@ internal class PW52 : BasePracticalWork
 
 	void Part3(ref int[] arr)
 	{
-		// Фактически реализовано в CreateRandomArray
+		// Реализовано в CreateRandomArray
+
+		int countOfEvenNumbers = 0;
+
+		foreach (var num in arr) if (num % 2 == 0)
+			countOfEvenNumbers++;
+
+		var procArr = new int[arr.Length + countOfEvenNumbers];
+		int j = 0;
+		for (int i = 0; i < arr.Length; i++)
+		{
+			var num = arr[i];
+			if (num % 2 == 0)
+			{
+				procArr[j] = 25;
+				j++;
+			}
+			procArr[j] = num;
+			j++;
+		}
+
+		arr = procArr;
+		/*
+
 		List<int> newArr = [];
 		foreach (int num in arr)
 		{
@@ -74,5 +105,6 @@ internal class PW52 : BasePracticalWork
 		}
 
 		arr = newArr.ToArray();
+		*/
 	}
 }

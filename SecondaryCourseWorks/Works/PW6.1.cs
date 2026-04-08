@@ -90,9 +90,9 @@ internal class PW61p3 : BasePracticalWork
 		for (int i = 0; i < half; i++)
 			for (int j = 0; j < width; j++)
 			{
-				int temp = matrix[i, j];
+				int old = matrix[i, j];
 				matrix[i, j] = matrix[i + half, j];
-				matrix[i + half, j] = temp;
+				matrix[i + half, j] = old;
 			}
 
 		Console.WriteLine($"\nProcessed matrix:");

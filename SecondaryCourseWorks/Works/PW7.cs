@@ -18,6 +18,20 @@ internal class PW7p1 : BasePracticalWork
 	public override void Execute()
 	{
 		string str = Input("Введите строку");
+		char[] newStr = new char[str.Length];
+
+		for (int i = 0; i < str.Length; i += 2)
+		{
+			if (i + 1 < str.Length)
+			{
+				newStr[i] = str[i + 1];
+				newStr[i + 1] = str[i];
+			}
+			else
+				newStr[i] = str[i];
+		}
+		Console.WriteLine($"Out: {string.Join("", newStr)}");
+		/*
 		var sb = new StringBuilder();
 
 		for (int i = 0; i < str.Length; i += 2)
@@ -28,6 +42,7 @@ internal class PW7p1 : BasePracticalWork
 		}
 
 		Console.WriteLine($"Out: {sb}");
+		*/
 	}
 }
 
@@ -49,6 +64,7 @@ internal class PW7p2 : BasePracticalWork
 		);
 
 		var words = Regex.Matches(message, @"\p{L}+").Select(m => m.Value);
+
 		List<string> filteredWords = new();
 		foreach (string word in words)
 			if (word.Length <= charsLimit)
